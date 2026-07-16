@@ -1,0 +1,23 @@
+.mcc-dashboard{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-top:30px;
+}
+
+.mcc-card{
+    background:#fff;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+
+.mcc-card h2{
+    margin-top:0;
+}
+
+.mcc-card p{
+    font-size:40px;
+    font-weight:bold;
+    margin:20px 0 0;
+}
