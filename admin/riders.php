@@ -1,23 +1,83 @@
 <?php
 
-global $wpdb;
+if (!defined('ABSPATH')) {
+    exit;
+}
 
-$table = $wpdb->prefix . 'mcc_riders';
-
-$count = $wpdb->get_var("SELECT COUNT(*) FROM $table");
+$riders = mcc_get_all_riders();
 
 ?>
 
 <div class="wrap">
 
-<h1>Riders</h1>
+<h1 class="wp-heading-inline">Riders</h1>
 
-<p>Database connection successful ✅</p>
+<a href="<?php echo admin_url('admin.php?page=mcc-add-rider'); ?>" class="page-title-action">
+    Add Rider
+</a>
 
-<p>Table:
-<strong><?php echo esc_html($table); ?></strong></p>
+<hr class="wp-header-end">
 
-<p>Rider count:
-<strong><?php echo esc_html($count); ?></strong></p>
+<?php if(empty($riders)): ?>
+
+<p>No riders found.</p>
+
+<?php else: ?>
+
+<table class="widefat striped">
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+<th>Email</th>
+<th>Status</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<?php foreach($riders as $rider): ?>
+
+<tr>
+
+<td>
+
+<?php
+echo esc_html(
+$rider->first_name . ' ' . $rider->last_name
+);
+?>
+
+</td>
+
+<td>
+
+<?php echo esc_html($rider->email); ?>
+
+</td>
+
+<td>
+
+<?php
+echo $rider->active
+? 'Active'
+: 'Inactive';
+?>
+
+</td>
+
+</tr>
+
+<?php endforeach; ?>
+
+</tbody>
+
+</table>
+
+<?php endif; ?>
 
 </div>

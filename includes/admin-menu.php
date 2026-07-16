@@ -37,6 +37,15 @@ function mcc_results_admin_menu()
         'mcc_riders_page'
     );
 
+    add_submenu_page(
+        null,
+        'Add Rider',
+        'Add Rider',
+        'manage_options',
+        'mcc-add-rider',
+        'mcc_add_rider_page'
+    );
+
     // Events
     add_submenu_page(
         'mcc-results',
@@ -95,3 +104,7 @@ function mcc_settings_page()
     echo '<div class="wrap"><h1>Settings</h1></div>';
 }
 
+function mcc_add_rider_page()
+{
+    require MCC_RESULTS_PATH . 'admin/add-rider.php';
+}

@@ -18,3 +18,4 @@ require_once MCC_RESULTS_PATH . 'includes/admin-menu.php';
 require_once MCC_RESULTS_PATH . 'includes/enqueue.php';
 require_once MCC_RESULTS_PATH . 'includes/database.php';
 register_activation_hook(__FILE__, 'mcc_results_install');
+require_once MCC_RESULTS_PATH . 'includes/Services/RiderService.php';
