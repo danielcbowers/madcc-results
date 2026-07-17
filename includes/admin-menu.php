@@ -46,6 +46,43 @@ function mcc_results_admin_menu()
         'mcc_add_rider_page'
     );
 
+    // Courses
+    add_submenu_page(
+        'mcc-results',
+        'Courses',
+        'Courses',
+        'manage_options',
+        'mcc-courses',
+        'mcc_courses_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Add Course',
+        'Add Course',
+        'manage_options',
+        'mcc-add-course',
+        'mcc_add_course_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Edit Course',
+        'Edit Course',
+        'manage_options',
+        'mcc-edit-course',
+        'mcc_edit_course_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Delete Course',
+        'Delete Course',
+        'manage_options',
+        'mcc-delete-course',
+        'mcc_delete_course_page'
+    );
+
     // Events
     add_submenu_page(
         'mcc-results',
@@ -54,6 +91,33 @@ function mcc_results_admin_menu()
         'manage_options',
         'mcc-events',
         'mcc_events_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Add Event',
+        'Add Event',
+        'manage_options',
+        'mcc-add-event',
+        'mcc_add_event_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Edit Event',
+        'Edit Event',
+        'manage_options',
+        'mcc-edit-event',
+        'mcc_edit_event_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Delete Event',
+        'Delete Event',
+        'manage_options',
+        'mcc-delete-event',
+        'mcc_delete_event_page'
     );
 
     // Results
@@ -89,9 +153,49 @@ function mcc_riders_page()
     require MCC_RESULTS_PATH . 'admin/riders.php';
 }
 
+function mcc_add_rider_page()
+{
+    require MCC_RESULTS_PATH . 'admin/add-rider.php';
+}
+
+function mcc_courses_page()
+{
+    require MCC_RESULTS_PATH . 'admin/courses.php';
+}
+
+function mcc_add_course_page()
+{
+    require MCC_RESULTS_PATH . 'admin/add-course.php';
+}
+
+function mcc_edit_course_page()
+{
+    require MCC_RESULTS_PATH . 'admin/edit-course.php';
+}
+
+function mcc_delete_course_page()
+{
+    require MCC_RESULTS_PATH . 'admin/delete-course.php';
+}
+
 function mcc_events_page()
 {
     require MCC_RESULTS_PATH . 'admin/events.php';
+}
+
+function mcc_add_event_page()
+{
+    require MCC_RESULTS_PATH . 'admin/add-event.php';
+}
+
+function mcc_edit_event_page()
+{
+    require MCC_RESULTS_PATH . 'admin/edit-event.php';
+}
+
+function mcc_delete_event_page()
+{
+    require MCC_RESULTS_PATH . 'admin/delete-event.php';
 }
 
 function mcc_results_page()
@@ -104,7 +208,4 @@ function mcc_settings_page()
     echo '<div class="wrap"><h1>Settings</h1></div>';
 }
 
-function mcc_add_rider_page()
-{
-    require MCC_RESULTS_PATH . 'admin/add-rider.php';
-}
+

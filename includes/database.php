@@ -11,21 +11,80 @@ function mcc_results_install()
 {
     global $wpdb;
 
-    $table_name = $wpdb->prefix . 'mcc_riders';
-
     $charset_collate = $wpdb->get_charset_collate();
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-    $sql = "CREATE TABLE $table_name (
+    /*
+     * Riders table
+     */
+    $riders_table = $wpdb->prefix . 'mcc_riders';
+
+    $sql = "CREATE TABLE $riders_table (
 
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+        bib_number INT NOT NULL,
 
         first_name VARCHAR(100) NOT NULL,
 
         last_name VARCHAR(100) NOT NULL,
 
         email VARCHAR(255) NULL,
+
+        club VARCHAR(100) DEFAULT 'Maldon CC',
+
+        active TINYINT(1) NOT NULL DEFAULT 1,
+
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        PRIMARY KEY (id)
+
+    ) $charset_collate;";
+
+    dbDelta($sql);
+
+    /*
+     * Events table
+     */
+    $events_table = $wpdb->prefix . 'mcc_events';
+
+    $sql = "CREATE TABLE $events_table (
+
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+        event_name VARCHAR(255) NOT NULL,
+
+        event_date DATE NOT NULL,
+
+        course_id BIGINT UNSIGNED NULL,
+
+        event_type VARCHAR(50) NOT NULL,
+
+        status VARCHAR(20) NOT NULL DEFAULT 'Planned',
+
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        PRIMARY KEY (id)
+
+    ) $charset_collate;";
+
+    dbDelta($sql);
+
+    /*
+     * Course table
+     */
+    $courses_table = $wpdb->prefix . 'mcc_courses';
+
+    $sql = "CREATE TABLE $courses_table (
+
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+        course_code VARCHAR(50) NOT NULL,
+
+        course_name VARCHAR(255) NOT NULL,
+
+        distance DECIMAL(5,2) NULL,
 
         active TINYINT(1) NOT NULL DEFAULT 1,
 
