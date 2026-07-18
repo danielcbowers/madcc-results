@@ -22,3 +22,6 @@ register_activation_hook(__FILE__, 'mcc_results_install');
 require_once MCC_RESULTS_PATH . 'includes/Services/RiderService.php';
 require_once MCC_RESULTS_PATH . 'includes/Services/EventService.php';
 require_once MCC_RESULTS_PATH . 'includes/Services/CourseService.php';
+require_once MCC_RESULTS_PATH . 'includes/Services/ResultsService.php';
+require_once MCC_RESULTS_PATH . 'includes/Helpers/TimeHelper.php';
+require_once MCC_RESULTS_PATH . 'includes/Helpers/ResultsHelper.php';

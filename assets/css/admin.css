@@ -21,3 +21,28 @@
     font-weight:bold;
     margin:20px 0 0;
 }
+
+.mcc-badge{
+    display:inline-block;
+    padding:4px 10px;
+    border-radius:20px;
+    color:#fff;
+    font-size:12px;
+    font-weight:600;
+}
+
+.mcc-success{
+    background:#00a32a;
+}
+
+.mcc-warning{
+    background:#dba617;
+}
+
+.mcc-info{
+    background:#2271b1;
+}
+
+.mcc-danger{
+    background:#d63638;
+}

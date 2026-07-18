@@ -46,6 +46,24 @@ function mcc_results_admin_menu()
         'mcc_add_rider_page'
     );
 
+    add_submenu_page(
+        null,
+        'Edit Rider',
+        'Edit Rider',
+        'manage_options',
+        'mcc-edit-rider',
+        'mcc_edit_rider_page'
+    );
+
+    add_submenu_page(
+        null,
+        'View Rider',
+        'View Rider',
+        'manage_options',
+        'mcc-view-rider',
+        'mcc_view_rider_page'
+    );
+
     // Courses
     add_submenu_page(
         'mcc-results',
@@ -72,15 +90,6 @@ function mcc_results_admin_menu()
         'manage_options',
         'mcc-edit-course',
         'mcc_edit_course_page'
-    );
-
-    add_submenu_page(
-        null,
-        'Delete Course',
-        'Delete Course',
-        'manage_options',
-        'mcc-delete-course',
-        'mcc_delete_course_page'
     );
 
     // Events
@@ -113,11 +122,11 @@ function mcc_results_admin_menu()
 
     add_submenu_page(
         null,
-        'Delete Event',
-        'Delete Event',
+        'View Event',
+        'View Event',
         'manage_options',
-        'mcc-delete-event',
-        'mcc_delete_event_page'
+        'mcc-view-event',
+        'mcc_view_event_page'
     );
 
     // Results
@@ -128,6 +137,24 @@ function mcc_results_admin_menu()
         'manage_options',
         'mcc-results-list',
         'mcc_results_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Add Result',
+        'Add Result',
+        'manage_options',
+        'mcc-add-result',
+        'mcc_add_result_page'
+    );
+
+    add_submenu_page(
+        null,
+        'Edit Result',
+        'Edit Result',
+        'manage_options',
+        'mcc-edit-result',
+        'mcc_edit_result_page'
     );
 
     // Settings
@@ -158,6 +185,16 @@ function mcc_add_rider_page()
     require MCC_RESULTS_PATH . 'admin/add-rider.php';
 }
 
+function mcc_edit_rider_page()
+{
+    require MCC_RESULTS_PATH . 'admin/edit-rider.php';
+}
+
+function mcc_view_rider_page()
+{
+    require MCC_RESULTS_PATH . 'admin/view-rider.php';
+}
+
 function mcc_courses_page()
 {
     require MCC_RESULTS_PATH . 'admin/courses.php';
@@ -171,11 +208,6 @@ function mcc_add_course_page()
 function mcc_edit_course_page()
 {
     require MCC_RESULTS_PATH . 'admin/edit-course.php';
-}
-
-function mcc_delete_course_page()
-{
-    require MCC_RESULTS_PATH . 'admin/delete-course.php';
 }
 
 function mcc_events_page()
@@ -193,9 +225,9 @@ function mcc_edit_event_page()
     require MCC_RESULTS_PATH . 'admin/edit-event.php';
 }
 
-function mcc_delete_event_page()
+function mcc_view_event_page()
 {
-    require MCC_RESULTS_PATH . 'admin/delete-event.php';
+    require MCC_RESULTS_PATH . 'admin/view-event.php';
 }
 
 function mcc_results_page()
@@ -203,9 +235,67 @@ function mcc_results_page()
     require MCC_RESULTS_PATH . 'admin/results.php';
 }
 
+function mcc_add_result_page()
+{
+    require MCC_RESULTS_PATH . 'admin/add-result.php';
+}
+
+function mcc_edit_result_page()
+{
+    require MCC_RESULTS_PATH . 'admin/edit-result.php';
+}
+
 function mcc_settings_page()
 {
     echo '<div class="wrap"><h1>Settings</h1></div>';
 }
 
+add_action('admin_enqueue_scripts', 'mcc_admin_scripts');
 
+function mcc_admin_scripts($hook)
+{
+    $allowedHooks = [
+        'admin_page_mcc-add-result',
+        'admin_page_mcc-edit-result'
+    ];
+
+    if (!in_array($hook, $allowedHooks, true)) {
+        return;
+    }
+
+    wp_enqueue_script(
+        'mcc-results-admin',
+        MCC_RESULTS_URL . 'assets/js/resolve-bib.js',
+        [],
+        '1.0.0',
+        true
+    );
+
+    wp_localize_script(
+        'mcc-results-admin',
+        'mccResults',
+        [
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce'   => wp_create_nonce('mcc_lookup_rider')
+        ]
+    );
+}
+
+add_action('wp_ajax_mcc_lookup_rider', 'mcc_lookup_rider');
+
+function mcc_lookup_rider()
+{
+    check_ajax_referer('mcc_lookup_rider', 'nonce');
+
+    $bib = intval($_POST['bib']);
+
+    $rider = mcc_get_rider_by_bib_number($bib);
+
+    if (!$rider) {
+        wp_send_json_error();
+    }
+
+    wp_send_json_success([
+        'name' => $rider->first_name . ' ' . $rider->last_name
+    ]);
+}

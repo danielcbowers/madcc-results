@@ -22,6 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             sanitize_text_field($_POST['last_name']),
             sanitize_email($_POST['email']),
             sanitize_text_field($_POST['club']),
+            sanitize_text_field($_POST['category']),
             isset($_POST['active'])
         );
 
@@ -117,6 +118,28 @@ class="regular-text">
             class="regular-text"
             value="Maldon CC"
             required>
+
+    </td>
+
+</tr>
+
+<tr>
+
+    <th>Category</th>
+
+    <td>
+
+        <select name="category">
+
+            <option value="">Select Category</option>
+            <option value="Senior">Senior</option>
+            <option value="Veteran">Veteran</option>
+            <option value="Junior">Junior</option>
+            <option value="Juvenile">Juvenile</option>
+            <option value="Female">Female</option>
+            <option value="Espoir">Espoir</option>
+
+        </select>
 
     </td>
 

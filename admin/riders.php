@@ -4,80 +4,119 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (
+    isset($_GET['action']) &&
+    $_GET['action'] === 'delete' &&
+    isset($_GET['id'])
+) {
+    $id = intval($_GET['id']);
+
+    check_admin_referer('delete_rider_' . $id);
+
+    if (mcc_delete_rider($id)) {
+        mcc_success_notice('Rider deleted successfully.');
+    } else {
+        mcc_error_notice('Unable to delete rider.');
+    }
+}
+
 $riders = mcc_get_all_riders();
 
 ?>
 
 <div class="wrap">
 
-<h1 class="wp-heading-inline">Riders</h1>
+    <h1 class="wp-heading-inline">Riders</h1>
 
-<a href="<?php echo admin_url('admin.php?page=mcc-add-rider'); ?>" class="page-title-action">
-    Add Rider
-</a>
+    <a href="<?php echo esc_url(admin_url('admin.php?page=mcc-add-rider')); ?>" class="page-title-action">
+        Add Rider
+    </a>
 
-<hr class="wp-header-end">
+    <hr class="wp-header-end">
 
-<?php if(empty($riders)): ?>
+    <?php if (empty($riders)) : ?>
 
-<p>No riders found.</p>
+        <p>No riders found.</p>
 
-<?php else: ?>
+    <?php else : ?>
 
-<table class="widefat striped">
+        <table class="widefat striped">
 
-<thead>
+            <thead>
 
-<tr>
+                <tr>
+                    <th>Bib</th>
+                    <th>Name</th>
+                    <th>Club</th>
+                    <th>Category</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
 
-<th>Name</th>
-<th>Email</th>
-<th>Status</th>
+            </thead>
 
-</tr>
+            <tbody>
 
-</thead>
+                <?php foreach ($riders as $rider) : ?>
 
-<tbody>
+                    <tr>
 
-<?php foreach($riders as $rider): ?>
+                        <td>
+                            <?php echo esc_html($rider->bib_number); ?>
+                        </td>
 
-<tr>
+                        <td>
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=mcc-view-rider&id=' . $rider->id)); ?>">
+                                <?php echo esc_html($rider->first_name . ' ' . $rider->last_name); ?>
+                            </a>
+                        </td>
 
-<td>
+                        <td>
+                            <?php echo esc_html($rider->club); ?>
+                        </td>
 
-<?php
-echo esc_html(
-$rider->first_name . ' ' . $rider->last_name
-);
-?>
+                        <td>
+                            <?php echo esc_html($rider->category ?? '-'); ?>
+                        </td>
 
-</td>
+                        <td>
+                            <?php echo esc_html($rider->email); ?>
+                        </td>
 
-<td>
+                        <td>
+                            <?php echo $rider->active ? 'Active' : 'Inactive'; ?>
+                        </td>
 
-<?php echo esc_html($rider->email); ?>
+                        <td>
 
-</td>
+                            <a href="<?php echo esc_url(admin_url('admin.php?page=mcc-edit-rider&id=' . $rider->id)); ?>">
+                                Edit
+                            </a>
 
-<td>
+                            |
 
-<?php
-echo $rider->active
-? 'Active'
-: 'Inactive';
-?>
+                            <a
+                                href="<?php echo esc_url(
+                                    wp_nonce_url(
+                                        admin_url('admin.php?page=mcc-riders&action=delete&id=' . $rider->id),
+                                        'delete_rider_' . $rider->id
+                                    )
+                                ); ?>"
+                                onclick="return confirm('Are you sure you want to delete this rider?');">
+                                Delete
+                            </a>
 
-</td>
+                        </td>
 
-</tr>
+                    </tr>
 
-<?php endforeach; ?>
+                <?php endforeach; ?>
 
-</tbody>
+            </tbody>
 
-</table>
+        </table>
 
-<?php endif; ?>
+    <?php endif; ?>
 
 </div>

@@ -34,6 +34,8 @@ function mcc_results_install()
 
         club VARCHAR(100) DEFAULT 'Maldon CC',
 
+        category VARCHAR(50) NULL,
+
         active TINYINT(1) NOT NULL DEFAULT 1,
 
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -91,6 +93,36 @@ function mcc_results_install()
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
         PRIMARY KEY (id)
+
+    ) $charset_collate;";
+
+    dbDelta($sql);
+
+    /*
+    * Results table
+    */
+    $results_table = $wpdb->prefix . 'mcc_results';
+
+    $sql = "CREATE TABLE $results_table (
+
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+
+        event_id BIGINT UNSIGNED NOT NULL,
+
+        rider_id BIGINT UNSIGNED NOT NULL,
+
+        finish_time TIME NULL,
+
+        status VARCHAR(20) NOT NULL DEFAULT 'Finished',
+
+        comments TEXT NULL,
+
+        created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+        PRIMARY KEY (id),
+
+        KEY event_id (event_id),
+        KEY rider_id (rider_id)
 
     ) $charset_collate;";
 

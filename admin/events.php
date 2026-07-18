@@ -4,6 +4,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (
+    isset($_GET['action']) &&
+    $_GET['action'] === 'delete' &&
+    isset($_GET['id'])
+) {
+    $id = intval($_GET['id']);
+
+    check_admin_referer('delete_event_' . $id);
+
+    if (mcc_delete_event($id)) {
+        mcc_success_notice('Event deleted successfully.');
+    } else {
+        mcc_error_notice('Unable to delete event.');
+    }
+}
+
 $events = mcc_get_all_events();
 
 ?>
@@ -77,7 +93,10 @@ $events = mcc_get_all_events();
     |
 
     <a
-        href="<?php echo admin_url('admin.php?page=mcc-delete-event&id=' . $event->id); ?>"
+        href="<?php echo wp_nonce_url(
+            admin_url('admin.php?page=mcc-events&action=delete&id=' . $event->id),
+            'delete_event_' . $event->id
+        ); ?>"
         onclick="return confirm('Delete this event?');">
 
         Delete
@@ -85,10 +104,6 @@ $events = mcc_get_all_events();
     </a>
 
 </td>
-
-<td colspan="6">No events found.</td>
-
-</tr>
 
 <?php endforeach; ?>
 

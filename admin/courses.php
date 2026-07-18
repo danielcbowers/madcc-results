@@ -4,6 +4,22 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+if (
+    isset($_GET['action']) &&
+    $_GET['action'] === 'delete' &&
+    isset($_GET['id'])
+) {
+    $id = intval($_GET['id']);
+
+    check_admin_referer('delete_course_' . $id);
+
+    if (mcc_delete_course($id)) {
+        mcc_success_notice('Course deleted successfully.');
+    } else {
+        mcc_error_notice('Unable to delete course.');
+    }
+}
+
 $courses = mcc_get_all_courses();
 
 ?>
@@ -62,7 +78,10 @@ Add Course
     |
 
     <a
-        href="<?php echo admin_url('admin.php?page=mcc-delete-course&id=' . $course->id); ?>"
+        href="<?php echo wp_nonce_url(
+            admin_url('admin.php?page=mcc-courses&action=delete&id=' . $course->id),
+            'delete_course_' . $course->id
+        ); ?>"
         onclick="return confirm('Delete this course?');">
 
         Delete
