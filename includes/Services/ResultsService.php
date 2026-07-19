@@ -183,3 +183,28 @@ function mcc_get_event_statistics($eventId)
 
     return $stats;
 }
+
+/**
+ * Get the position of a rider in an event
+ */
+function mcc_get_position_for_rider($eventId, $riderId)
+{
+    $results = mcc_get_results_by_event($eventId);
+
+    $position = 1;
+
+    foreach ($results as $result) {
+
+        if ($result->status !== 'Finished') {
+            continue;
+        }
+
+        if ($result->rider_id == $riderId) {
+            return $position;
+        }
+
+        $position++;
+    }
+
+    return null;
+}

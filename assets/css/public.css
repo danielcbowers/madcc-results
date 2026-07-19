@@ -1,0 +1,161 @@
+.mcc-results {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.mcc-event {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+    background: #fff;
+}
+
+.mcc-event h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.mcc-event-date {
+    color: #777;
+    margin-bottom: 20px;
+}
+
+.mcc-summary {
+    display: flex;
+    gap: 50px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.mcc-summary p {
+    margin: 0;
+    min-width: 140px;
+}
+
+.mcc-button {
+    display: inline-block;
+    padding: 10px 18px;
+    background: #0073aa;
+    color: #fff !important;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+.mcc-button:hover {
+    background: #005177;
+}
+
+.mcc-results-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.mcc-results-table th,
+.mcc-results-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+.mcc-results-table th {
+    background: #f5f5f5;
+    font-weight: 600;
+}
+
+.mcc-event-summary {
+
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+
+    margin: 25px 0;
+
+    padding: 20px;
+
+    background: #f7f7f7;
+
+    border-radius: 8px;
+
+}
+
+.mcc-event-summary div {
+
+    min-width: 120px;
+
+}
+
+.mcc-event-details {
+
+    display: flex;
+    gap: 25px;
+    flex-wrap: wrap;
+
+    margin-bottom: 25px;
+
+}
+
+.mcc-event-details div {
+
+    min-width: 150px;
+
+}
+
+.mcc-winner-card {
+
+    background: linear-gradient(135deg,#fff8dc,#ffe08a);
+
+    border: 3px solid #d4af37;
+
+    border-radius: 12px;
+
+    padding: 30px;
+
+    margin: 30px 0;
+
+    text-align: center;
+
+    box-shadow: 0 8px 18px rgba(0,0,0,.15);
+
+}
+
+.mcc-winner-badge{
+
+    display:inline-block;
+
+    background:#d4af37;
+
+    color:white;
+
+    padding:8px 18px;
+
+    border-radius:30px;
+
+    font-weight:bold;
+
+    margin-bottom:20px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+}
+
+.mcc-winner-card h2{
+
+    margin:0;
+
+    font-size:2rem;
+
+}
+
+.mcc-winning-time{
+
+    margin-top:10px;
+
+    font-size:1.6rem;
+
+    font-weight:bold;
+
+}

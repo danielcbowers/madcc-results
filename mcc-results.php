@@ -14,6 +14,9 @@ define('MCC_RESULTS_VERSION', '1.0.0');
 define('MCC_RESULTS_PATH', plugin_dir_path(__FILE__));
 define('MCC_RESULTS_URL', plugin_dir_url(__FILE__));
 
+/**
+ * Load the admin plugin assets and pages.
+ */
 require_once MCC_RESULTS_PATH . 'includes/admin-menu.php';
 require_once MCC_RESULTS_PATH . 'includes/enqueue.php';
 require_once MCC_RESULTS_PATH . 'includes/database.php';
@@ -25,3 +28,8 @@ require_once MCC_RESULTS_PATH . 'includes/Services/CourseService.php';
 require_once MCC_RESULTS_PATH . 'includes/Services/ResultsService.php';
 require_once MCC_RESULTS_PATH . 'includes/Helpers/TimeHelper.php';
 require_once MCC_RESULTS_PATH . 'includes/Helpers/ResultsHelper.php';
+
+/**
+ * Load the public plugin assets and shortcodes.
+ */
+require_once MCC_RESULTS_PATH . 'public/shortcodes.php';

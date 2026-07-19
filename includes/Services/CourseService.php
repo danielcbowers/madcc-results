@@ -128,3 +128,4 @@ function mcc_get_course_display_name($id)
 
     return $course->course_code . ' - ' . $course->course_name;
 }
+

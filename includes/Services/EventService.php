@@ -123,3 +123,27 @@ function mcc_delete_event($id)
         ]
     );
 }
+
+/**
+ * Get the latest completed events
+ */
+function mcc_get_latest_events($limit = 5)
+{
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'mcc_events';
+
+    return $wpdb->get_results(
+        $wpdb->prepare(
+            "
+            SELECT *
+            FROM {$table}
+            WHERE status = %s
+            ORDER BY event_date DESC
+            LIMIT %d
+            ",
+            'Completed',
+            $limit
+        )
+    );
+}
