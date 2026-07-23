@@ -247,7 +247,7 @@ function mcc_edit_result_page()
 
 function mcc_settings_page()
 {
-    echo '<div class="wrap"><h1>Settings</h1></div>';
+    require MCC_RESULTS_PATH . 'admin/settings.php';
 }
 
 add_action('admin_enqueue_scripts', 'mcc_admin_scripts');

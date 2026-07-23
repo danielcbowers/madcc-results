@@ -44,7 +44,21 @@ function mcc_get_course($id)
 /**
  * Add a course
  */
-function mcc_add_course($courseCode, $courseName, $distance, $active = true)
+function mcc_add_course(
+    $courseCode,
+    $courseName,
+    $courseType,
+    $distance,
+    $description,
+    $startLocation,
+    $startLatitude,
+    $startLongitude,
+    $finishLocation,
+    $finishLatitude,
+    $finishLongitude,
+    $notes,
+    $active = true
+)
 {
     global $wpdb;
 
@@ -53,15 +67,114 @@ function mcc_add_course($courseCode, $courseName, $distance, $active = true)
     return $wpdb->insert(
         $table,
         [
-            'course_code' => $courseCode,
-            'course_name' => $courseName,
-            'distance'    => $distance,
-            'active'      => $active ? 1 : 0
+            'course_code'      => $courseCode,
+            'course_name'      => $courseName,
+            'course_type'      => $courseType,
+            'distance'         => $distance,
+            'description'      => $description,
+
+            'start_location'   => $startLocation,
+            'start_latitude'   => $startLatitude,
+            'start_longitude'  => $startLongitude,
+
+            'finish_location'  => $finishLocation,
+            'finish_latitude'  => $finishLatitude,
+            'finish_longitude' => $finishLongitude,
+
+            'notes'            => $notes,
+
+            'active'           => $active ? 1 : 0
         ],
         [
             '%s',
             '%s',
+            '%s',
             '%f',
+            '%s',
+
+            '%s',
+            '%f',
+            '%f',
+
+            '%s',
+            '%f',
+            '%f',
+
+            '%s',
+
+            '%d'
+        ]
+    );
+}
+
+/**
+ * Update a course
+ */
+function mcc_update_course(
+    $id,
+    $courseCode,
+    $courseName,
+    $courseType,
+    $distance,
+    $description,
+    $startLocation,
+    $startLatitude,
+    $startLongitude,
+    $finishLocation,
+    $finishLatitude,
+    $finishLongitude,
+    $notes,
+    $active
+)
+{
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'mcc_courses';
+
+    return $wpdb->update(
+        $table,
+        [
+            'course_code'      => $courseCode,
+            'course_name'      => $courseName,
+            'course_type'      => $courseType,
+            'distance'         => $distance,
+            'description'      => $description,
+
+            'start_location'   => $startLocation,
+            'start_latitude'   => $startLatitude,
+            'start_longitude'  => $startLongitude,
+
+            'finish_location'  => $finishLocation,
+            'finish_latitude'  => $finishLatitude,
+            'finish_longitude' => $finishLongitude,
+
+            'notes'            => $notes,
+
+            'active'           => $active ? 1 : 0
+        ],
+        [
+            'id' => $id
+        ],
+        [
+            '%s',
+            '%s',
+            '%s',
+            '%f',
+            '%s',
+
+            '%s',
+            '%f',
+            '%f',
+
+            '%s',
+            '%f',
+            '%f',
+
+            '%s',
+
+            '%d'
+        ],
+        [
             '%d'
         ]
     );
@@ -84,38 +197,6 @@ function mcc_delete_course($id)
 }
 
 /**
- * Update a course
- */
-function mcc_update_course($id, $courseCode, $courseName, $distance, $active)
-{
-    global $wpdb;
-
-    $table = $wpdb->prefix . 'mcc_courses';
-
-    return $wpdb->update(
-        $table,
-        [
-            'course_code' => $courseCode,
-            'course_name' => $courseName,
-            'distance'    => $distance,
-            'active'      => $active ? 1 : 0
-        ],
-        [
-            'id' => $id
-        ],
-        [
-            '%s',
-            '%s',
-            '%f',
-            '%d'
-        ],
-        [
-            '%d'
-        ]
-    );
-}
-
-/**
  * Get a formatted course name
  */
 function mcc_get_course_display_name($id)
@@ -128,4 +209,3 @@ function mcc_get_course_display_name($id)
 
     return $course->course_code . ' - ' . $course->course_name;
 }
-

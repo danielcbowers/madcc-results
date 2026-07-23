@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('MCC_RESULTS_VERSION', '1.0.0');
+define('MCC_RESULTS_VERSION', '1.0.1');
 define('MCC_RESULTS_PATH', plugin_dir_path(__FILE__));
 define('MCC_RESULTS_URL', plugin_dir_url(__FILE__));
 
@@ -26,6 +26,7 @@ require_once MCC_RESULTS_PATH . 'includes/Services/RiderService.php';
 require_once MCC_RESULTS_PATH . 'includes/Services/EventService.php';
 require_once MCC_RESULTS_PATH . 'includes/Services/CourseService.php';
 require_once MCC_RESULTS_PATH . 'includes/Services/ResultsService.php';
+require_once MCC_RESULTS_PATH . 'includes/services/SpondService.php';
 require_once MCC_RESULTS_PATH . 'includes/Helpers/TimeHelper.php';
 require_once MCC_RESULTS_PATH . 'includes/Helpers/ResultsHelper.php';
 

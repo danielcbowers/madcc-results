@@ -74,8 +74,8 @@ function mcc_results_install()
     dbDelta($sql);
 
     /*
-     * Course table
-     */
+    * Course table
+    */
     $courses_table = $wpdb->prefix . 'mcc_courses';
 
     $sql = "CREATE TABLE $courses_table (
@@ -86,7 +86,23 @@ function mcc_results_install()
 
         course_name VARCHAR(255) NOT NULL,
 
-        distance DECIMAL(5,2) NULL,
+        course_type VARCHAR(50) NOT NULL DEFAULT 'TT',
+
+        distance_miles DECIMAL(5,2) NULL,
+
+        description TEXT NULL,
+
+        start_location VARCHAR(255) NULL,
+        start_latitude DECIMAL(10,8) NULL,
+        start_longitude DECIMAL(11,8) NULL,
+
+        finish_location VARCHAR(255) NULL,
+        finish_latitude DECIMAL(10,8) NULL,
+        finish_longitude DECIMAL(11,8) NULL,
+
+        route_geojson LONGTEXT NULL,
+
+        notes TEXT NULL,
 
         active TINYINT(1) NOT NULL DEFAULT 1,
 
