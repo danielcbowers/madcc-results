@@ -36,11 +36,6 @@ $stats   = mcc_get_rider_statistics($riderId);
     <div class="mcc-event-details">
 
         <div>
-            <strong>Bib Number</strong><br>
-            <?php echo esc_html($rider->bib_number); ?>
-        </div>
-
-        <div>
             <strong>Category</strong><br>
             <?php echo esc_html($rider->category); ?>
         </div>
@@ -89,7 +84,7 @@ $stats   = mcc_get_rider_statistics($riderId);
                     <th>Pos</th>
                     <th>Date</th>
                     <th>Event</th>
-                    <th>Time</th>
+                    <th>Actual Time</th>
                     <th>Status</th>
                 </tr>
             </thead>
@@ -156,7 +151,7 @@ $stats   = mcc_get_rider_statistics($riderId);
                             <?php
 
                             echo $result->status === 'Finished'
-                                ? esc_html($result->finish_time)
+                                ? esc_html($result->actual_time)
                                 : '-';
 
                             ?>

@@ -114,9 +114,15 @@ mcc_back_link(
 
 <option value="Training" <?php selected($course->course_type, 'Training'); ?>>Training Ride</option>
 
-<option value="Road Race" <?php selected($course->course_type, 'Road Race'); ?>>Road Race</option>
-
 <option value="Reliability Ride" <?php selected($course->course_type, 'Reliability Ride'); ?>>Reliability Ride</option>
+
+<option value="Open 10" <?php selected($course->course_type, 'Open 10'); ?>>Open 10</option>
+
+<option value="Open 25" <?php selected($course->course_type, 'Open 25'); ?>>Open 25</option>
+
+<option value="Open 50" <?php selected($course->course_type, 'Open 50'); ?>>Open 50</option>
+
+<option value="Hilly" <?php selected($course->course_type, 'Hilly'); ?>>Hilly</option>
 
 </select>
 

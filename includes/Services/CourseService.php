@@ -70,7 +70,7 @@ function mcc_add_course(
             'course_code'      => $courseCode,
             'course_name'      => $courseName,
             'course_type'      => $courseType,
-            'distance'         => $distance,
+            'distance_miles'         => $distance,
             'description'      => $description,
 
             'start_location'   => $startLocation,

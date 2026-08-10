@@ -20,14 +20,14 @@ function mcc_get_all_riders()
     $table = $wpdb->prefix . 'mcc_riders';
 
     return $wpdb->get_results(
-        "SELECT * FROM {$table} ORDER BY last_name, first_name"
+        "SELECT * FROM {$table} ORDER BY first_name, last_name"
     );
 }
 
 /**
  * Add a rider
  */
-function mcc_add_rider($bibNumber, $firstName, $lastName, $email, $club, $category, $active = true)
+function mcc_add_rider($firstName, $lastName, $email, $club, $category, $active = true)
 {
     global $wpdb;
 
@@ -36,7 +36,6 @@ function mcc_add_rider($bibNumber, $firstName, $lastName, $email, $club, $catego
     return $wpdb->insert(
         $table,
         [
-            'bib_number' => $bibNumber,
             'first_name' => $firstName,
             'last_name'  => $lastName,
             'email'      => $email,
@@ -45,34 +44,13 @@ function mcc_add_rider($bibNumber, $firstName, $lastName, $email, $club, $catego
             'active'     => $active ? 1 : 0
         ],
         [
-            '%d',
+            '%s',
             '%s',
             '%s',
             '%s',
             '%s',
             '%d'
         ]
-    );
-}
-
-/**
- * Check if a bib number already exists
- */
-function mcc_bib_number_exists($bibNumber, $excludeId = 0)
-{
-    global $wpdb;
-
-    $table = $wpdb->prefix . 'mcc_riders';
-
-    return (bool) $wpdb->get_var(
-        $wpdb->prepare(
-            "SELECT COUNT(*)
-             FROM {$table}
-             WHERE bib_number = %d
-             AND id != %d",
-            $bibNumber,
-            $excludeId
-        )
     );
 }
 
@@ -94,29 +72,10 @@ function mcc_get_rider($id)
 }
 
 /**
- * Get a rider by bib number
- */
-function mcc_get_rider_by_bib_number($bibNumber)
-{
-    global $wpdb;
-
-    $table = $wpdb->prefix . 'mcc_riders';
-
-    return $wpdb->get_row(
-        $wpdb->prepare(
-            "SELECT * FROM {$table}
-             WHERE bib_number = %d",
-            $bibNumber
-        )
-    );
-}
-
-/**
  * Update a rider
  */
 function mcc_update_rider(
     $id,
-    $bibNumber,
     $firstName,
     $lastName,
     $email,
@@ -132,7 +91,6 @@ function mcc_update_rider(
     return $wpdb->update(
         $table,
         [
-            'bib_number' => $bibNumber,
             'first_name' => $firstName,
             'last_name'  => $lastName,
             'email'      => $email,
@@ -144,7 +102,6 @@ function mcc_update_rider(
             'id' => $id
         ],
         [
-            '%d',
             '%s',
             '%s',
             '%s',
@@ -221,14 +178,14 @@ function mcc_get_rider_results($riderId)
 {
     global $wpdb;
 
-    return $wpdb->get_results(
+    $results = $wpdb->get_results(
         $wpdb->prepare(
             "
             SELECT
                 r.*,
                 e.event_name,
                 e.event_date,
-                c.distance
+                c.distance_miles AS distance
             FROM {$wpdb->prefix}mcc_results r
             INNER JOIN {$wpdb->prefix}mcc_events e
                 ON r.event_id = e.id
@@ -240,4 +197,119 @@ function mcc_get_rider_results($riderId)
             $riderId
         )
     );
+
+    foreach ($results as &$result) {
+
+        if ($result->status === 'Finished') {
+
+            $result->actual_seconds = mcc_calculate_actual_seconds(
+                $result->finish_time,
+                $result->bib_number
+            );
+
+            $result->actual_time = mcc_format_actual_time(
+                $result->actual_seconds
+            );
+
+        } else {
+
+            $result->actual_seconds = PHP_INT_MAX;
+            $result->actual_time = '-';
+        }
+    }
+
+    unset($result);
+
+    return $results;
 }
+
+function mcc_sync_spond_rider(array $member)
+{
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'mcc_riders';
+
+    // Already linked by Spond member ID
+    $rider = $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT *
+            FROM {$table}
+            WHERE spond_member_id = %s",
+            $member['id']
+        )
+    );
+
+    if ($rider) {
+
+        $wpdb->update(
+            $table,
+            [
+                'first_name'      => mcc_format_name($member['firstName']),
+                'last_name'       => mcc_format_name($member['lastName']),
+                'active'          => 1,
+                'spond_member_id' => $member['id']
+            ],
+            [
+                'id' => $rider->id
+            ],
+            [
+                '%s',
+                '%s',
+                '%d',
+                '%s'
+            ],
+            [
+                '%d'
+            ]
+        );
+
+        return $rider->id;
+    }
+
+    // Create rider
+    $wpdb->insert(
+        $table,
+        [
+            'first_name'      => mcc_format_name($member['firstName']),
+            'last_name'       => mcc_format_name($member['lastName']),
+            'club'            => 'Maldon CC',
+            'active'          => 1,
+            'spond_member_id' => $member['id']
+        ],
+        [
+            '%s',
+            '%s',
+            '%s',
+            '%d',
+            '%s'
+        ]
+    );
+
+    return $wpdb->insert_id;
+}
+
+function mcc_find_spond_member(array $members, string $memberId): ?array
+{
+    foreach ($members as $member) {
+        if ($member['id'] === $memberId) {
+            return $member;
+        }
+    }
+
+    return null;
+}
+
+function mcc_get_rider_by_spond_member_id($spondMemberId)
+{
+    global $wpdb;
+
+    $table = $wpdb->prefix . 'mcc_riders';
+
+    return $wpdb->get_row(
+        $wpdb->prepare(
+            "SELECT * FROM {$table} WHERE spond_member_id = %s",
+            $spondMemberId
+        )
+    );
+}
+

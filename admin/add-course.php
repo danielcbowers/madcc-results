@@ -90,8 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <option value="TT">Time Trial</option>
     <option value="Training">Training Ride</option>
-    <option value="Road Race">Road Race</option>
     <option value="Reliability Ride">Reliability Ride</option>
+    <option value="Open 10">Open 10</option>
+    <option value="Open 25">Open 25</option>
+    <option value="Open 50">Open 50</option>
+    <option value="Hilly">Hilly</option>
 
 </select>
 

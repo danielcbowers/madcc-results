@@ -11,6 +11,8 @@ function mcc_results_install()
 {
     global $wpdb;
 
+    ob_start();
+
     $charset_collate = $wpdb->get_charset_collate();
 
     require_once ABSPATH . 'wp-admin/includes/upgrade.php';
@@ -24,7 +26,7 @@ function mcc_results_install()
 
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 
-        bib_number INT NOT NULL,
+        spond_member_id VARCHAR(32) NULL,
 
         first_name VARCHAR(100) NOT NULL,
 
@@ -44,7 +46,7 @@ function mcc_results_install()
 
     ) $charset_collate;";
 
-    dbDelta($sql);
+    $wpdb->query($sql);
 
     /*
      * Events table
@@ -55,9 +57,19 @@ function mcc_results_install()
 
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 
+        spond_event_id VARCHAR(32) DEFAULT NULL,
+
         event_name VARCHAR(255) NOT NULL,
 
+        description TEXT NULL,
+
         event_date DATE NOT NULL,
+
+        start_time TIME NULL,
+
+        end_time TIME NULL,
+
+        location VARCHAR(255) NULL,
 
         course_id BIGINT UNSIGNED NULL,
 
@@ -67,11 +79,19 @@ function mcc_results_install()
 
         created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-        PRIMARY KEY (id)
+        updated_at DATETIME NULL,
+
+        accepted_count INT NOT NULL DEFAULT 0,
+
+        accepted_riders LONGTEXT NULL,
+
+        PRIMARY KEY (id),
+
+        KEY spond_event_id (spond_event_id)
 
     ) $charset_collate;";
 
-    dbDelta($sql);
+    $wpdb->query($sql);
 
     /*
     * Course table
@@ -112,7 +132,7 @@ function mcc_results_install()
 
     ) $charset_collate;";
 
-    dbDelta($sql);
+    $wpdb->query($sql);
 
     /*
     * Results table
@@ -127,7 +147,11 @@ function mcc_results_install()
 
         rider_id BIGINT UNSIGNED NOT NULL,
 
+        bib_number INT UNSIGNED NOT NULL,
+
         finish_time TIME NULL,
+
+        bike_type VARCHAR(20) NOT NULL DEFAULT 'Time Trial',
 
         status VARCHAR(20) NOT NULL DEFAULT 'Finished',
 
@@ -137,10 +161,18 @@ function mcc_results_install()
 
         PRIMARY KEY (id),
 
-        KEY event_id (event_id),
-        KEY rider_id (rider_id)
+        KEY idx_event_id (event_id),
+        KEY idx_rider_id (rider_id),
+        KEY idx_bib_number (bib_number)
 
     ) $charset_collate;";
 
-    dbDelta($sql);
+    $wpdb->query($sql);
+
+    $output = ob_get_clean();
+
+    if (!empty($output)) {
+        error_log("Plugin activation output:");
+        error_log($output);
+    }
 }

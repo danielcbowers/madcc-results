@@ -30,11 +30,6 @@ $results = mcc_get_rider_results($id);
         <tbody>
 
             <tr>
-                <th>Bib Number</th>
-                <td><?php echo esc_html($rider->bib_number); ?></td>
-            </tr>
-
-            <tr>
                 <th>Club</th>
                 <td><?php echo esc_html($rider->club); ?></td>
             </tr>

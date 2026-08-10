@@ -117,8 +117,10 @@ value="<?php echo esc_attr($course->id); ?>"
 $types = [
     'Club 10',
     'Club 25',
-    'Hill Climb',
-    'Open Event'
+    'Open 10',
+    'Open 25',
+    'Sunday Social',
+    'Hill Climb'
 ];
 
 foreach ($types as $type) :

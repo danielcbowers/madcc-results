@@ -35,24 +35,64 @@ if (
 $results = mcc_get_results_by_event($id);
 $stats = mcc_get_event_statistics($id);
 
-/*
-|--------------------------------------------------------------------------
-| Sort results
-|--------------------------------------------------------------------------
-*/
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-usort($results, function ($a, $b) {
+    check_admin_referer('mcc_save_results');
 
-    if ($a->status === 'Finished' && $b->status !== 'Finished') {
-        return -1;
+    // Delete existing results for this event
+    global $wpdb;
+
+    $wpdb->delete(
+        $wpdb->prefix . 'mcc_results',
+        [
+            'event_id' => $id
+        ],
+        [
+            '%d'
+        ]
+    );
+
+    // Save each row
+    foreach ($_POST['rider_id'] as $index => $riderId) {
+
+        if (empty($riderId)) {
+            continue;
+        }
+
+        $result = mcc_add_result(
+            $id,
+            intval($riderId),
+            intval($_POST['bib_number'][$index]),
+            sanitize_text_field($_POST['bike_type'][$index]),
+            sanitize_text_field($_POST['finish_time'][$index]),
+            sanitize_text_field($_POST['status'][$index]),
+            sanitize_textarea_field($_POST['comments'][$index])
+        );
+
+        global $wpdb;
+
+        if ($result === false) {
+
+            echo '<h2>Database Error</h2>';
+
+            echo '<pre>';
+            echo $wpdb->last_error;
+            echo '</pre>';
+
+            echo '<pre>';
+            print_r($wpdb->last_query);
+            echo '</pre>';
+
+            die();
+        }
     }
 
-    if ($a->status !== 'Finished' && $b->status === 'Finished') {
-        return 1;
-    }
+    mcc_success_notice('Results saved successfully.');
 
-    return strcmp($a->finish_time, $b->finish_time);
-});
+    // Reload results and stats
+    $results = mcc_get_results_by_event($id);
+    $stats = mcc_get_event_statistics($id);
+}
 
 $position = 1;
 
@@ -118,8 +158,21 @@ $position = 1;
             </tr>
 
             <tr>
-                <th>Fastest Time</th>
-                <td><?php echo esc_html($stats['fastest'] ?: '-'); ?></td>
+                <?php
+                $fastest = '-';
+
+                foreach ($results as $result) {
+                    if ($result->status === 'Finished') {
+                        $fastest = $result->actual_time;
+                        break;
+                    }
+                }
+                ?>
+
+                <tr>
+                    <th>Fastest Time</th>
+                    <td><?php echo esc_html($fastest); ?></td>
+                </tr>
             </tr>
 
         </tbody>
@@ -132,142 +185,289 @@ $position = 1;
 
     </h2>
 
-    <a href="<?php echo admin_url('admin.php?page=mcc-add-result&event_id=' . $event->id); ?>"
-       class="page-title-action">
-        Add Result
-    </a>
+    <?php $riders = mcc_get_all_riders(); ?>
 
-    <hr class="wp-header-end">
+    <form method="post">
 
-    <?php if ($results) : ?>
+    <?php wp_nonce_field('mcc_save_results'); ?>
 
-        <table class="widefat striped">
+    <table class="widefat striped">
 
-            <thead>
+        <thead>
 
-                <tr>
+            <tr>
 
-                    <th>Pos</th>
-                    <th>Bib</th>
-                    <th>Rider</th>
-                    <th>Time</th>
-                    <th>Avg. Speed (mph)</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                <th style="width:80px;">Bib</th>
+                <th style="width:160px;">Bike</th>
+                <th>Rider</th>
+                <th style="width:120px;">Time</th>
+                <th style="width:120px;">Status</th>
+                <th>Comments</th>
+                <th style="width:80px;"></th>
 
-                </tr>
+            </tr>
 
-            </thead>
+        </thead>
 
-            <tbody>
+        <tbody id="results-body">
 
-            <?php foreach ($results as $result) : ?>
+            <?php if (!empty($results)) : ?>
 
-                <?php
+                <?php foreach ($results as $result) : ?>
 
-                if ($result->status === 'Finished') {
-                    $pos = $position++;
-                } else {
-                    $pos = '-';
-                }
+                    <tr>
 
-                ?>
+                        <td>
+                            <input
+                                type="number"
+                                name="bib_number[]"
+                                class="small-text"
+                                value="<?php echo esc_attr($result->bib_number); ?>">
+                        </td>
+
+                        <td>
+
+                            <select name="bike_type[]">
+
+                                <option value="Time Trial" <?php selected($result->bike_type, 'Time Trial'); ?>>
+                                    Time Trial
+                                </option>
+
+                                <option value="Road Bike" <?php selected($result->bike_type, 'Road Bike'); ?>>
+                                    Road Bike
+                                </option>
+
+                                <option value="Retro Bike" <?php selected($result->bike_type, 'Retro Bike'); ?>>
+                                    Retro Bike
+                                </option>
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <select name="rider_id[]">
+
+                                <option value="">Select rider...</option>
+
+                                <?php foreach ($riders as $rider) : ?>
+
+                                    <option
+                                        value="<?php echo $rider->id; ?>"
+                                        <?php selected($result->rider_id, $rider->id); ?>>
+
+                                        <?php echo esc_html($rider->first_name . ' ' . $rider->last_name); ?>
+
+                                    </option>
+
+                                <?php endforeach; ?>
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="text"
+                                name="finish_time[]"
+                                value="<?php echo esc_attr($result->finish_time); ?>">
+
+                        </td>
+
+                        <td>
+
+                            <select name="status[]">
+
+                                <option value="Finished" <?php selected($result->status, 'Finished'); ?>>Finished</option>
+                                <option value="DNF" <?php selected($result->status, 'DNF'); ?>>DNF</option>
+                                <option value="DNS" <?php selected($result->status, 'DNS'); ?>>DNS</option>
+                                <option value="DSQ" <?php selected($result->status, 'DSQ'); ?>>DSQ</option>
+
+                            </select>
+
+                        </td>
+
+                        <td>
+
+                            <input
+                                type="text"
+                                name="comments[]"
+                                value="<?php echo esc_attr($result->comments); ?>">
+
+                        </td>
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="button remove-row">
+
+                                Remove
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+
+                <?php endforeach; ?>
+
+            <?php else : ?>
 
                 <tr>
 
                     <td>
 
-                        <?php
+                        <input
+                            type="number"
+                            name="bib_number[]"
+                            class="small-text">
 
-                        if ($pos === 1) {
-                            echo '🥇';
-                        } elseif ($pos === 2) {
-                            echo '🥈';
-                        } elseif ($pos === 3) {
-                            echo '🥉';
-                        } else {
-                            echo esc_html($pos);
+                    </td>
+
+                    <td>
+
+                        <select name="bike_type[]">
+
+                            <option value="Time Trial">Time Trial</option>
+                            <option value="Road Bike">Road Bike</option>
+                            <option value="Retro Bike">Retro Bike</option>
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <select name="rider_id[]">
+
+                            <option value="">Select rider...</option>
+
+                            <?php foreach ($riders as $rider) : ?>
+
+                                <option value="<?php echo $rider->id; ?>">
+
+                                    <?php echo esc_html($rider->first_name . ' ' . $rider->last_name); ?>
+
+                                </option>
+
+                            <?php endforeach; ?>
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <input
+                            type="text"
+                            name="finish_time[]"
+                            placeholder="00:23:14">
+
+                    </td>
+
+                    <td>
+
+                        <select name="status[]">
+
+                            <option value="Finished">Finished</option>
+                            <option value="DNF">DNF</option>
+                            <option value="DNS">DNS</option>
+                            <option value="DSQ">DSQ</option>
+
+                        </select>
+
+                    </td>
+
+                    <td>
+
+                        <input
+                            type="text"
+                            name="comments[]">
+
+                    </td>
+
+                    <td>
+
+                        <button
+                            type="button"
+                            class="button remove-row">
+
+                            Remove
+
+                        </button>
+
+                    </td>
+
+                </tr>
+
+            <?php endif; ?>
+
+        </tbody>
+
+    </table>
+
+    <p>
+
+    <button
+        type="button"
+        class="button"
+        id="add-row">
+
+        + Add Rider
+
+    </button>
+
+    </p>
+
+    <?php submit_button('Save Results'); ?>
+
+    </form>
+
+    <script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const tbody = document.getElementById("results-body");
+
+            document.getElementById("add-row").onclick = function () {
+
+                const row = tbody.rows[0].cloneNode(true);
+
+                row.querySelectorAll("input").forEach(i => i.value = "");
+
+                row.querySelectorAll("select").forEach(s => s.selectedIndex = 0);
+
+                tbody.appendChild(row);
+
+                wireButtons();
+
+            };
+
+            function wireButtons() {
+
+                document.querySelectorAll(".remove-row").forEach(button => {
+
+                    button.onclick = function () {
+
+                        if (tbody.rows.length > 1) {
+
+                            this.closest("tr").remove();
+
                         }
 
-                        ?>
+                    };
 
-                    </td>
+                });
 
-                    <td><?php echo esc_html($result->bib_number); ?></td>
+            }
 
-                    <td>
-                        <a href="<?php echo esc_url(
-                            admin_url('admin.php?page=mcc-view-rider&id=' . $result->rider_id)
-                        ); ?>">
-                            <?php echo esc_html($result->first_name . ' ' . $result->last_name); ?>
-                        </a>
-                    </td>
+            wireButtons();
 
-                    <td><?php echo esc_html($result->finish_time); ?></td>
+        });
 
-                    <td>
-
-                    <?php
-
-                    if ($result->status === 'Finished') {
-
-                        echo esc_html(
-                            mcc_calculate_average_speed(
-                                $course->distance,
-                                $result->finish_time
-                            )
-                        );
-
-                    } else {
-
-                        echo '-';
-
-                    }
-
-                    ?>
-
-                    </td>
-
-                    <td><?php echo esc_html($result->status); ?></td>
-
-                    <td>
-
-                        <a href="<?php echo admin_url('admin.php?page=mcc-edit-result&id=' . $result->id); ?>">
-                            Edit
-                        </a>
-
-                        |
-
-                        <a
-                            href="<?php echo wp_nonce_url(
-                                admin_url(
-                                    'admin.php?page=mcc-view-event&id=' .
-                                    $event->id .
-                                    '&action=delete_result&result_id=' .
-                                    $result->id
-                                ),
-                                'delete_result_' . $result->id
-                            ); ?>"
-                            onclick="return confirm('Delete this result?');">
-
-                            Delete
-
-                        </a>
-
-                    </td>
-
-                </tr>
-
-            <?php endforeach; ?>
-
-            </tbody>
-
-        </table>
-
-    <?php else : ?>
-
-        <p>No results have been entered yet.</p>
-
-    <?php endif; ?>
+    </script>
 
 </div>

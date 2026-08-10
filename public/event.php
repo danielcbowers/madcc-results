@@ -4,14 +4,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$eventId = isset($_GET['event']) ? intval($_GET['event']) : 0;
+$event_id = isset($_GET['event']) ? intval($_GET['event']) : 0;
 
-if (!$eventId) {
-    echo '<p>No event selected.</p>';
+if (!$event_id) {
+    echo '<p>Event not found.</p>';
     return;
 }
 
-$event = mcc_get_event($eventId);
+$event = mcc_get_event($event_id);
+
+if (!$event) {
+    echo '<p>Event not found.</p>';
+    return;
+}
 
 $course = null;
 
@@ -19,217 +24,142 @@ if (!empty($event->course_id)) {
     $course = mcc_get_course($event->course_id);
 }
 
-if (!$event) {
-    echo '<p>Event not found.</p>';
-    return;
+$riders = [];
+
+if (!empty($event->accepted_riders)) {
+    $riders = json_decode($event->accepted_riders, true);
 }
 
-$results = mcc_get_results_by_event($eventId);
-
-$stats = mcc_get_event_statistics($eventId);
-
-$winner = null;
-
-foreach ($results as $result) {
-
-    if ($result->status === 'Finished') {
-        $winner = $result;
-        break;
-    }
-}
 ?>
 
-<div class="mcc-results">
+<div class="mcc-event-page">
 
-    <h2><?php echo esc_html($event->event_name); ?></h2>
+    <header class="mcc-event-header">
 
-    <p class="mcc-event-date">
-        <?php echo esc_html(date('j F Y', strtotime($event->event_date))); ?>
-    </p>
+        <h1><?php echo esc_html($event->event_name); ?></h1>
 
-    <?php if (empty($results)) : ?>
+        <p class="mcc-event-date">
+            📅 <?php echo esc_html(date('l j F Y', strtotime($event->event_date))); ?>
+        </p>
 
-        <p>No results have been entered for this event.</p>
+        <?php if (!empty($event->start_time)) : ?>
 
-    <?php else : ?>
-    
-        <div class="mcc-event-details">
+            <p class="mcc-event-time">
+                🕒 <?php echo esc_html(date('H:i', strtotime($event->start_time))); ?>
 
-            <div>
-                <strong>Event Type</strong><br>
-                <?php echo esc_html($event->event_type); ?>
-            </div>
+                <?php if (!empty($event->end_time)) : ?>
+                    - <?php echo esc_html(date('H:i', strtotime($event->end_time))); ?>
+                <?php endif; ?>
 
-            <?php if ($course) : ?>
+            </p>
 
-                <div>
-                    <strong>Course</strong><br>
-                    <?php echo esc_html($course->course_name); ?>
-                </div>
+        <?php endif; ?>
 
-                <div>
-                    <strong>Distance</strong><br>
-                    <?php echo esc_html($course->distance); ?> miles
-                </div>
+    </header>
+
+    <div class="mcc-event-grid">
+
+        <div class="mcc-card">
+
+            <h2>Event Information</h2>
+
+            <table class="mcc-event-table">
+
+                <tr>
+                    <th>Status</th>
+                    <td><?php echo esc_html($event->status); ?></td>
+                </tr>
+
+                <tr>
+                    <th>Course</th>
+                    <td>
+                        <?php
+                        echo $course
+                            ? esc_html($course->course_name)
+                            : 'Unknown';
+                        ?>
+                    </td>
+                </tr>
+
+                <?php if (!empty($event->location)) : ?>
+
+                    <tr>
+                        <th>Location</th>
+                        <td><?php echo esc_html($event->location); ?></td>
+                    </tr>
+
+                <?php endif; ?>
+
+                <tr>
+                    <th>Entries</th>
+                    <td><?php echo intval($event->accepted_count); ?></td>
+                </tr>
+
+            </table>
+
+            <?php if (!empty($event->description)) : ?>
+
+                <h3>Description</h3>
+
+                <p>
+                    <?php echo nl2br(esc_html($event->description)); ?>
+                </p>
 
             <?php endif; ?>
 
-            <div>
-                <strong>Status</strong><br>
-                <?php echo esc_html($event->status); ?>
-            </div>
-
         </div>
 
-        <div class="mcc-event-summary">
+        <div class="mcc-card">
 
-            <div>
-                <strong>Winner</strong><br>
+            <h2>
+                🚴 Riders Entered
+                (<?php echo intval($event->accepted_count); ?>)
+            </h2>
 
-                <?php
+            <?php if (!empty($riders)) : ?>
 
-                if ($winner) {
+                <ul class="mcc-rider-list">
 
-                    echo esc_html(
-                        $winner->first_name . ' ' . $winner->last_name
-                    );
+                    <?php foreach ($riders as $rider) : ?>
 
-                } else {
+                        <li>
 
-                    echo 'No Results';
+                            <a href="<?php echo esc_url(home_url('/rider/?id=' . $rider['rider_id'])); ?>">
 
-                }
-
-                ?>
-
-            </div>
-
-            <div>
-
-                <strong>Winning Time</strong><br>
-
-                <?php echo esc_html($stats['fastest'] ?: '—'); ?>
-
-            </div>
-
-            <div>
-
-                <strong>Riders</strong><br>
-
-                <?php echo $stats['total']; ?>
-
-            </div>
-
-            <div>
-
-                <strong>Finished</strong><br>
-
-                <?php echo $stats['finished']; ?>
-
-            </div>
-
-            <div>
-
-                <strong>DNF</strong><br>
-
-                <?php echo $stats['dnf']; ?>
-
-            </div>
-
-        </div>
-
-        <table class="mcc-results-table">
-
-            <thead>
-                <tr>
-                    <th>Pos</th>
-                    <th>Bib</th>
-                    <th>Rider</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-
-            <tbody>
-
-                <?php
-
-                $position = 1;
-
-                foreach ($results as $result) :
-
-                ?>
-
-                    <tr>
-
-                        <td>
-
-                            <?php
-
-                            if ($result->status === 'Finished') {
-
-                                switch ($position) {
-
-                                    case 1:
-                                        echo '🥇 1';
-                                        break;
-
-                                    case 2:
-                                        echo '🥈 2';
-                                        break;
-
-                                    case 3:
-                                        echo '🥉 3';
-                                        break;
-
-                                    default:
-                                        echo $position;
-                                }
-
-                                $position++;
-
-                            } else {
-
-                                echo '-';
-
-                            }
-
-                            ?>
-
-                        </td>
-
-                        <td><?php echo esc_html($result->bib_number); ?></td>
-
-                        <td>
-                            <a href="<?php echo esc_url(home_url('/rider-profile/?id=' . $result->rider_id)); ?>">
                                 <?php
                                 echo esc_html(
-                                    $result->first_name . ' ' . $result->last_name
+                                    $rider['first_name'] . ' ' . $rider['last_name']
                                 );
                                 ?>
+
                             </a>
-                        </td>
 
-                        <td>
+                        </li>
 
-                            <?php
-                            echo $result->status === 'Finished'
-                                ? esc_html($result->finish_time)
-                                : '-';
-                            ?>
+                    <?php endforeach; ?>
 
-                        </td>
+                </ul>
 
-                        <td><?php echo esc_html($result->status); ?></td>
+            <?php else : ?>
 
-                    </tr>
+                <p>No riders have entered yet.</p>
 
-                <?php endforeach; ?>
+            <?php endif; ?>
 
-            </tbody>
+        </div>
 
-        </table>
+    </div>
 
-    <?php endif; ?>
+    <div class="mcc-event-actions">
+
+        <a
+            class="mcc-button"
+            href="<?php echo esc_url(home_url('/event-results/?event=' . $event->id)); ?>">
+
+            View Results →
+
+        </a>
+
+    </div>
 
 </div>

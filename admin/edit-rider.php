@@ -16,29 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     check_admin_referer('mcc_edit_rider');
 
-    $bibNumber = intval($_POST['bib_number']);
-
-    if (mcc_bib_number_exists($bibNumber, $id)) {
-
-        mcc_error_notice('That bib number is already assigned.');
-
-    } else {
-
         mcc_update_rider(
-            $id,
-            $bibNumber,
-            sanitize_text_field($_POST['first_name']),
-            sanitize_text_field($_POST['last_name']),
-            sanitize_email($_POST['email']),
-            sanitize_text_field($_POST['club']),
-            sanitize_text_field($_POST['category']),
-            isset($_POST['active'])
-        );
+        sanitize_text_field($_POST['first_name']),
+        sanitize_text_field($_POST['last_name']),
+        sanitize_email($_POST['email']),
+        sanitize_text_field($_POST['club']),
+        sanitize_text_field($_POST['category']),
+        isset($_POST['active'])
+    );
 
-        $rider = mcc_get_rider($id);
-
-        echo '<div class="notice notice-success"><p>Rider updated successfully.</p></div>';
-    }
+    echo '<div class="notice notice-success"><p>Rider updated successfully.</p></div>';
 }
 
 ?>
@@ -52,18 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php wp_nonce_field('mcc_edit_rider'); ?>
 
         <table class="form-table">
-
-            <tr>
-                <th>Bib Number</th>
-                <td>
-                    <input
-                        type="number"
-                        name="bib_number"
-                        min="1"
-                        value="<?php echo esc_attr($rider->bib_number); ?>"
-                        required>
-                </td>
-            </tr>
 
             <tr>
                 <th>First Name</th>

@@ -45,7 +45,6 @@ $riders = mcc_get_all_riders();
             <thead>
 
                 <tr>
-                    <th>Bib</th>
                     <th>Name</th>
                     <th>Club</th>
                     <th>Category</th>
@@ -61,10 +60,6 @@ $riders = mcc_get_all_riders();
                 <?php foreach ($riders as $rider) : ?>
 
                     <tr>
-
-                        <td>
-                            <?php echo esc_html($rider->bib_number); ?>
-                        </td>
 
                         <td>
                             <a href="<?php echo esc_url(admin_url('admin.php?page=mcc-view-rider&id=' . $rider->id)); ?>">

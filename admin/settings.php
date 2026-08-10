@@ -4,7 +4,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['test_spond'])) {
 
     check_admin_referer('mcc_save_settings');
 
@@ -25,21 +25,19 @@ if (isset($_POST['test_spond'])) {
 
     check_admin_referer('mcc_save_settings');
 
-    $spond = new MCC_SpondService();
+    $spond = new SpondService();
 
-    $result = $spond->login();
+    $events = $spond->getEvents();
 
-    if (is_wp_error($result)) {
+    if (is_wp_error($events)) {
 
-        echo '<div class="notice notice-error"><p>';
-        echo esc_html($result->get_error_message());
-        echo '</p></div>';
+        echo '<div class="notice notice-error"><p>' .
+            esc_html($events->get_error_message()) .
+            '</p></div>';
 
     } else {
 
-        echo '<div class="notice notice-success"><p>';
-        echo 'Successfully connected to Spond!';
-        echo '</p></div>';
+        echo '<div class="notice notice-success"><p>Spond connection successful.</p></div>';
 
     }
 }

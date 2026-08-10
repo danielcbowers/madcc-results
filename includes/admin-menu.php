@@ -130,14 +130,14 @@ function mcc_results_admin_menu()
     );
 
     // Results
-    add_submenu_page(
-        'mcc-results',
-        'Results',
-        'Results',
-        'manage_options',
-        'mcc-results-list',
-        'mcc_results_page'
-    );
+    // add_submenu_page(
+    //     'mcc-results',
+    //     'Results',
+    //     'Results',
+    //     'manage_options',
+    //     'mcc-results-list',
+    //     'mcc_results_page'
+    // );
 
     add_submenu_page(
         null,
@@ -237,7 +237,7 @@ function mcc_results_page()
 
 function mcc_add_result_page()
 {
-    require MCC_RESULTS_PATH . 'admin/add-result.php';
+    require MCC_RESULTS_PATH . 'admin/enter-results.php';
 }
 
 function mcc_edit_result_page()
@@ -298,4 +298,29 @@ function mcc_lookup_rider()
     wp_send_json_success([
         'name' => $rider->first_name . ' ' . $rider->last_name
     ]);
+}
+
+add_action('admin_enqueue_scripts', 'mcc_dashboard_assets');
+
+function mcc_dashboard_assets($hook)
+{
+    // Only load on the MCC Dashboard
+    if ($hook !== 'toplevel_page_mcc-results') {
+        return;
+    }
+
+    wp_enqueue_style(
+        'mcc-dashboard',
+        MCC_RESULTS_URL . 'assets/css/dashboard.css',
+        [],
+        '1.0.0'
+    );
+
+    wp_enqueue_script(
+        'mcc-dashboard',
+        MCC_RESULTS_URL . 'assets/js/dashboard.js',
+        [],
+        '1.0.0',
+        true
+    );
 }

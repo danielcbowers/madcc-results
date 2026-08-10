@@ -17,28 +17,65 @@ function mcc_get_results_by_event($eventId)
 {
     global $wpdb;
 
-    return $wpdb->get_results(
+    $results = $wpdb->get_results(
         $wpdb->prepare(
             "
             SELECT
                 r.*,
                 rd.first_name,
-                rd.last_name,
-                rd.bib_number
+                rd.last_name
             FROM {$wpdb->prefix}mcc_results r
             INNER JOIN {$wpdb->prefix}mcc_riders rd
                 ON r.rider_id = rd.id
             WHERE r.event_id = %d
-            ORDER BY
-                CASE
-                    WHEN r.status = 'Finished' THEN 0
-                    ELSE 1
-                END,
-                r.finish_time ASC
             ",
             $eventId
         )
     );
+
+    foreach ($results as &$result) {
+
+        if ($result->status === 'Finished') {
+
+            $result->actual_seconds = mcc_calculate_actual_seconds(
+                $result->finish_time,
+                $result->bib_number
+            );
+
+            $result->actual_time = mcc_format_actual_time(
+                $result->actual_seconds
+            );
+
+        } else {
+
+            $result->actual_seconds = PHP_INT_MAX;
+            $result->actual_time = '-';
+        }
+    }
+
+    unset($result);
+
+    usort($results, function ($a, $b) {
+
+        // Finished riders always come first
+        if ($a->status === 'Finished' && $b->status !== 'Finished') {
+            return -1;
+        }
+
+        if ($a->status !== 'Finished' && $b->status === 'Finished') {
+            return 1;
+        }
+
+        // Non-finished riders retain their order
+        if ($a->status !== 'Finished' && $b->status !== 'Finished') {
+            return 0;
+        }
+
+        // Finished riders are sorted by actual time
+        return $a->actual_seconds <=> $b->actual_seconds;
+    });
+
+    return $results;
 }
 
 /**
@@ -62,7 +99,7 @@ function mcc_get_result($id)
 /**
  * Add a result
  */
-function mcc_add_result($eventId, $riderId, $finishTime, $status, $comments)
+function mcc_add_result($eventId, $riderId, $bibNumber, $bikeType, $finishTime, $status, $comments)
 {
     global $wpdb;
 
@@ -73,6 +110,8 @@ function mcc_add_result($eventId, $riderId, $finishTime, $status, $comments)
         [
             'event_id'    => $eventId,
             'rider_id'    => $riderId,
+            'bib_number'  => $bibNumber,
+            'bike_type'   => $bikeType,
             'finish_time' => $finishTime,
             'status'      => $status,
             'comments'    => $comments
@@ -80,6 +119,8 @@ function mcc_add_result($eventId, $riderId, $finishTime, $status, $comments)
         [
             '%d',
             '%d',
+            '%d',
+            '%s',
             '%s',
             '%s',
             '%s'
@@ -93,6 +134,8 @@ function mcc_add_result($eventId, $riderId, $finishTime, $status, $comments)
 function mcc_update_result(
     $id,
     $riderId,
+    $bibNumber,
+    $bikeType,
     $finishTime,
     $status,
     $comments
@@ -103,12 +146,25 @@ function mcc_update_result(
         $wpdb->prefix . 'mcc_results',
         [
             'rider_id'    => $riderId,
+            'bib_number'  => $bibNumber,
+            'bike_type'   => $bikeType,
             'finish_time' => $finishTime,
             'status'      => $status,
             'comments'    => $comments
         ],
         [
             'id' => $id
+        ],
+        [
+            '%d',
+            '%d',
+            '%s',
+            '%s',
+            '%s',
+            '%s'
+        ],
+        [
+            '%d'
         ]
     );
 }
@@ -207,4 +263,15 @@ function mcc_get_position_for_rider($eventId, $riderId)
     }
 
     return null;
+}
+
+function mcc_calculate_actual_seconds($finishTime, $bibNumber)
+{
+    return strtotime('1970-01-01 ' . $finishTime)
+        - ((int) $bibNumber * 60);
+}
+
+function mcc_format_actual_time($seconds)
+{
+    return gmdate('H:i:s', $seconds);
 }
